@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Register Face</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body class="container mt-5">
+    <h2>Register New User</h2>
+    {% with messages = get_flashed_messages() %}
+      {% if messages %}
+        {% for msg in messages %}
+          <div class="alert alert-info">{{ msg }}</div>
+        {% endfor %}
+      {% endif %}
+    {% endwith %}
+    <form method="post" onsubmit="return submitForm()">
+        <input type="hidden" name="image_data" id="image_data">
+        <div class="mb-3">
+            <label>User ID:</label>
+            <input type="text" name="user_id" required class="form-control">
+        </div>
+        <div class="mb-3">
+            <label>Name:</label>
+            <input type="text" name="name" required class="form-control">
+        </div>
+        <div class="mb-3">
+            <label>Phone:</label>
+            <input type="text" name="phone" required class="form-control">
+        </div>
+        <video id="video" width="320" height="240" autoplay class="border mb-2"></video><br>
+        <button type="button" onclick="captureImage()" class="btn btn-secondary mb-3">Capture Face</button><br>
+        <button type="submit" class="btn btn-primary">Register</button>
+    </form>
+
+    <a href="{{ url_for('home') }}" class="btn btn-secondary mt-4">Home</a>
+
+<script>
+    const video = document.getElementById('video');
+    navigator.mediaDevices.getUserMedia({ video: true }).then(stream => {
+        video.srcObject = stream;
+    });
+
+    function captureImage() {
+        const canvas = document.createElement('canvas');
+        canvas.width = video.videoWidth;
+        canvas.height = video.videoHeight;
+        canvas.getContext('2d').drawImage(video, 0, 0);
+        const imageData = canvas.toDataURL('image/jpeg');
+        document.getElementById('image_data').value = imageData;
+        alert("Face captured! Now submit the form.");
+    }
+
+    function submitForm() {
+        if (!document.getElementById('image_data').value) {
+            alert("Please capture the face image before submitting.");
+            return false;
+        }
+        return true;
+    }
+</script>
+</body>
+</html>

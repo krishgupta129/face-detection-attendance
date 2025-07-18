@@ -1,0 +1,47 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Recognize Face</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+</head>
+<body class="container mt-5">
+    <h2>Mark Attendance</h2>
+    <video id="video" width="320" height="240" autoplay class="border mb-3"></video><br>
+    <button onclick="captureAndSend()" class="btn btn-success">Recognize</button>
+    <p id="result" class="mt-3"></p>
+
+    <a href="{{ url_for('home') }}" class="btn btn-secondary mt-4">Home</a>
+
+<script>
+    const video = document.getElementById('video');
+    navigator.mediaDevices.getUserMedia({ video: true }).then(stream => {
+        video.srcObject = stream;
+    });
+
+    function captureAndSend() {
+        const canvas = document.createElement('canvas');
+        canvas.width = video.videoWidth;
+        canvas.height = video.videoHeight;
+        canvas.getContext('2d').drawImage(video, 0, 0);
+        const imageData = canvas.toDataURL('image/jpeg');
+
+        fetch('/recognize_face', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ image: imageData })
+        })
+        .then(res => res.json())
+        .then(data => {
+            const result = document.getElementById('result');
+            if (data.status === 'success') {
+                result.innerText = `Welcome ${data.name} (ID: ${data.user_id})! Attendance marked.`;
+                result.className = 'text-success';
+            } else {
+                result.innerText = data.message;
+                result.className = 'text-danger';
+            }
+        });
+    }
+</script>
+</body>
+</html>
